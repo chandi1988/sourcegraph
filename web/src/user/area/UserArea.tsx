@@ -219,47 +219,67 @@ export const UserArea: React.FunctionComponent<UserAreaProps> = ({
     )
 
     const isSettingsArea = matchedRoute?.path === '/settings'
-    const isMainProfilePage = matchedRoute?.path === ''
+    const isOverview = matchedRoute?.path === ''
     const showSidebar = !isSettingsArea && !matchedRoute?.hideNamespaceAreaSidebar
 
-    return (
-        <div className="container mt-4 d-flex flex-wrap">
-            {showSidebar && <UserAreaSidebar {...context} className="mr-4" />}
-            <div className="flex-1">
-                <UserAreaTabs
-                    {...context}
-                    navItems={props.userAreaHeaderNavItems}
-                    size={isMainProfilePage ? 'large' : 'small'}
-                    className="mb-3" // TODO(sqs)
-                />
-                <ErrorBoundary location={props.location}>
-                    <React.Suspense fallback={<LoadingSpinner className="icon-inline m-2" />}>
-                        <Switch>
-                            {userAreaRoutes.map(
-                                ({ path, exact, render, condition = () => true }) =>
-                                    condition(context) && (
-                                        <Route
-                                            // eslint-disable-next-line react/jsx-no-bind
-                                            render={routeComponentProps =>
-                                                render({ ...context, ...routeComponentProps })
-                                            }
-                                            path={url + path}
-                                            key="hardcoded-key" // see https://github.com/ReactTraining/react-router/issues/4578#issuecomment-334489490
-                                            exact={exact}
-                                        />
-                                    )
-                            )}
-                            <Route key="hardcoded-key">
-                                <HeroPage
-                                    icon={MapSearchIcon}
-                                    title="404: Not Found"
-                                    subtitle="Sorry, the requested user page was not found."
+    const sidebar = showSidebar && (
+        <UserAreaSidebar {...context} size={isOverview ? 'large' : 'small'} className="mr-4 mb-3" />
+    )
+    const tabs = (
+        <UserAreaTabs
+            {...context}
+            navItems={props.userAreaHeaderNavItems}
+            size={isOverview ? 'large' : 'small'}
+            className="mb-3" // TODO(sqs)
+        />
+    )
+    const content = (
+        <ErrorBoundary location={props.location}>
+            <React.Suspense fallback={<LoadingSpinner className="icon-inline m-2" />}>
+                <Switch>
+                    {userAreaRoutes.map(
+                        ({ path, exact, render, condition = () => true }) =>
+                            condition(context) && (
+                                <Route
+                                    // eslint-disable-next-line react/jsx-no-bind
+                                    render={routeComponentProps => render({ ...context, ...routeComponentProps })}
+                                    path={url + path}
+                                    key="hardcoded-key" // see https://github.com/ReactTraining/react-router/issues/4578#issuecomment-334489490
+                                    exact={exact}
                                 />
-                            </Route>
-                        </Switch>
-                    </React.Suspense>
-                </ErrorBoundary>
-            </div>
+                            )
+                    )}
+                    <Route key="hardcoded-key">
+                        <HeroPage
+                            icon={MapSearchIcon}
+                            title="404: Not Found"
+                            subtitle="Sorry, the requested user page was not found."
+                        />
+                    </Route>
+                </Switch>
+            </React.Suspense>
+        </ErrorBoundary>
+    )
+
+    return (
+        <div className="container mt-4">
+            {isOverview ? (
+                <div className="d-flex flex-wrap">
+                    {sidebar}
+                    <div className="flex-1">
+                        {tabs}
+                        {content}
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="d-flex w-100">
+                        {sidebar}
+                        {tabs}
+                    </div>
+                    {content}
+                </>
+            )}
         </div>
     )
 }
