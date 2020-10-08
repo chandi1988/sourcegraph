@@ -315,6 +315,9 @@ type ReposListOptions struct {
 	// List of fields by which to order the return repositories.
 	OrderBy RepoListOrderBy
 
+	// After represents the primary key ID to use for cursor-based pagination.
+	After int
+
 	*LimitOffset
 }
 
@@ -439,6 +442,7 @@ func parsePattern(p string) ([]*sqlf.Query, error) {
 func (*repos) listSQL(opt ReposListOptions) (conds []*sqlf.Query, err error) {
 	conds = []*sqlf.Query{
 		sqlf.Sprintf("deleted_at IS NULL"),
+		sqlf.Sprintf("id > %d", opt.After),
 	}
 	if opt.Query != "" && (len(opt.IncludePatterns) > 0 || opt.ExcludePattern != "") {
 		return nil, errors.New("Repos.List: Query and IncludePatterns/ExcludePattern options are mutually exclusive")

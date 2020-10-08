@@ -28,6 +28,7 @@ func (r *schemaResolver) Repositories(args *struct {
 	NotIndexed bool
 	OrderBy    string
 	Descending bool
+	After      *string
 }) (*repositoryConnectionResolver, error) {
 	opt := db.ReposListOptions{
 		OrderBy: db.RepoListOrderBy{{
